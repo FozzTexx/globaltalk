@@ -32,36 +32,6 @@ RUN : \
     ; rm -rf /var/lib/apt/lists/* \
     ;
 
-# # Install Retro68 cross compiler
-
-# RUN : \
-#     ; apt-get update \
-#     ; apt-get install -y --no-install-recommends \
-#         # Keep package list in alphabetical order
-# 	g++ \
-# 	libgmp-dev \
-# 	libmpc-dev \
-# 	libmpfr-dev \
-# 	texinfo \
-#     ; rm -rf /var/lib/apt/lists/* \
-#     ;
-
-# RUN <<EOF
-# cd /tmp
-# git clone --recursive https://github.com/autc04/Retro68.git
-# mkdir Retro68-build
-# cd Retro68-build
-# ../Retro68/build-toolchain.bash
-# EOF
-
-# # Mouse fixes
-# RUN <<EOF
-# cd /tmp
-# git clone https://github.com/elliotnunn/classicvirtio.git
-# cd classicvirtio
-# make
-# EOF
-
 RUN : \
     ; cd /tmp \
     ; wget -nv https://download.qemu.org/qemu-8.2.2.tar.xz \
