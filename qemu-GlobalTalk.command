@@ -10,6 +10,8 @@ qemu-system-m68k \
 -drive file=pram.img,format=raw,if=mtd \
 -nic user,model=dp83932,mac=08:00:07:A2:A2:A2 \
 \
+-device nubus-virtio-mmio,romfile=classic/declrom \
+-device virtio-tablet-device \
 -device scsi-hd,scsi-id=0,drive=hd0 \
 -device scsi-hd,scsi-id=3,drive=cd3 \
 -drive format=raw,media=disk,if=none,id=hd0,file=GlobalTalk_HD.img \

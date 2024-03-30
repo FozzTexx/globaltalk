@@ -11,4 +11,4 @@ $(IMAGE): Dockerfile
 	&& docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
 
 run: $(IMAGE)
-	docker run -it --rm -p 5910:5910 -v ${PWD}:/$(IMAGE) $(IMAGE):latest
+	docker run -it --rm -p localhost:5910:5910 -v ${PWD}:/$(IMAGE) $(IMAGE):latest
