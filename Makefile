@@ -11,4 +11,11 @@ $(IMAGE): Dockerfile
 	&& docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
 
 run: $(IMAGE)
-	docker run -it --rm -p ::1:5910:5910 -v ${PWD}:/$(IMAGE) $(IMAGE):latest
+	docker run \
+	  -it \
+	  --rm \
+	  -p ::1:5910:5910 \
+	  --network host \
+	  --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun \
+	  -v ${PWD}:/$(IMAGE) \
+	  $(IMAGE):latest

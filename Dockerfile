@@ -47,3 +47,8 @@ patch -p1 < /tmp/classicvirtio/patches/qemu-m68k-virtio.patch
 make
 make install
 EOF
+
+RUN <<EOF
+mkdir /usr/local/etc/qemu
+echo allow br0 > /usr/local/etc/qemu/bridge.conf
+EOF
