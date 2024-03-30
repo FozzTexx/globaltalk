@@ -44,3 +44,8 @@ cd qemu-8.2.2/
 make
 make install
 EOF
+
+RUN <<EOF
+mkdir /usr/local/etc/qemu
+echo allow br0 > /usr/local/etc/qemu/bridge.conf
+EOF
