@@ -13,6 +13,7 @@ qemu-system-m68k \
     -device nubus-virtio-mmio,romfile=classic/declrom \
     -device virtio-tablet-device \
     -device scsi-hd,scsi-id=0,drive=hd0 \
-    -device scsi-hd,scsi-id=3,drive=cd3 \
     -drive format=raw,media=disk,if=none,id=hd0,file=GlobalTalk_HD.img \
-    -drive format=raw,media=cdrom,if=none,id=cd3,file=Sys7.1-GlobalTalk_Install.img \
+
+#    -device scsi-hd,scsi-id=3,drive=cd3 \
+#    -drive format=raw,media=cdrom,if=none,id=cd3,file=Sys7.1-GlobalTalk_Install.img \
