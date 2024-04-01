@@ -20,8 +20,6 @@ RUN : \
 	libpixman-1-dev \
 	libslirp0 \
 	libtool \
-	libvde-dev \
-	libvdeplug-dev \
 	make \
 	ninja-build \
 	patch \
@@ -32,17 +30,17 @@ RUN : \
     ; rm -rf /var/lib/apt/lists/* \
     ;
 
+ENV QEMU_VERS=8.2.2
+
 RUN : \
     ; cd /tmp \
-    ; wget -nv https://download.qemu.org/qemu-8.2.2.tar.xz \
+    ; wget -nv https://download.qemu.org/qemu-${QEMU_VERS}.tar.xz \
     ;
 
 RUN <<EOF
 cd /tmp
-git clone https://github.com/elliotnunn/classicvirtio.git
-tar xf qemu-8.2.2.tar.xz
-cd qemu-8.2.2/
-patch -p1 < /tmp/classicvirtio/patches/qemu-m68k-virtio.patch
+tar xf qemu-${QEMU_VERS}.tar.xz
+cd qemu-${QEMU_VERS}
 ./configure --target-list=m68k-softmmu --enable-vnc --disable-docs --enable-slirp
 make
 make install

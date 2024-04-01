@@ -2,6 +2,7 @@
 cd "$(dirname "$0")"
 
 DISK=GlobalTalk_HD.img
+CDROM=Sys7.1-GlobalTalk_Install.img
 
 qemu-system-m68k \
     -M q800 \
@@ -13,7 +14,7 @@ qemu-system-m68k \
     -nic bridge,model=dp83932,mac=08:00:07:A2:A2:A2 \
 \
     -device scsi-hd,scsi-id=0,drive=hd0 \
-    -drive format=raw,media=disk,if=none,id=hd0,file=${DISK} \
+    -drive format=raw,media=disk,if=none,id=hd0,file="${DISK}" \
 
-#    -device scsi-hd,scsi-id=3,drive=cd3 \
-#    -drive format=raw,media=cdrom,if=none,id=cd3,file=Sys7.1-GlobalTalk_Install.img \
+#    -device scsi-cd,scsi-id=3,drive=cd3 \
+#    -drive format=raw,media=disk,if=none,id=cd3,file="${CDROM}" \
