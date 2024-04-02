@@ -31,6 +31,7 @@ RUN : \
     ;
 
 ENV QEMU_VERS=8.2.2
+#ENV QEMU_VERS=9.0.0-rc1
 
 RUN : \
     ; cd /tmp \
@@ -41,7 +42,12 @@ RUN <<EOF
 cd /tmp
 tar xf qemu-${QEMU_VERS}.tar.xz
 cd qemu-${QEMU_VERS}
-./configure --target-list=m68k-softmmu --enable-vnc --disable-docs --enable-slirp
+./configure \
+  --disable-docs \
+  --enable-slirp \
+  --enable-vnc \
+  --target-list=m68k-softmmu \
+  ;
 make
 make install
 EOF

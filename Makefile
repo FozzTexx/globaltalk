@@ -1,5 +1,8 @@
 IMAGE=globaltalk
 VERSION=1.0
+TABLET_DRIVER=classic/declrom
+VIRTIO_REPO=https://github.com/elliotnunn/classicvirtio
+VIRTIO_RELEASE=releases/download/latest/classicvirtio-drivers-latest.zip
 
 $(IMAGE): Dockerfile
 	env BUILDKIT_PROGRESS=plain \
@@ -10,7 +13,7 @@ $(IMAGE): Dockerfile
 	    --rm -t $(IMAGE):$(VERSION) . \
 	&& docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
 
-run: $(IMAGE) pram.img classic/declrom
+run: $(IMAGE) pram.img $(TABLET_DRIVER)
 	docker run \
 	  -it \
 	  --rm \
@@ -23,8 +26,6 @@ run: $(IMAGE) pram.img classic/declrom
 pram.img:
 	 dd if=/dev/zero of=$@ bs=256 count=1
 
-classicvirtio-drivers-latest.zip:
-	wget https://github.com/elliotnunn/classicvirtio/releases/download/latest/$@
-
-classic/declrom: classicvirtio-drivers-latest.zip
+$(TABLET_DRIVER):
+	wget $(VIRTIO_REPO)/$(VIRTIO_RELEASE)
 	unzip $<
