@@ -27,6 +27,7 @@ RUN : \
 	wget \
 	xz-utils \
 	zlib1g-dev \
+        iptables \
     ; rm -rf /var/lib/apt/lists/* \
     ;
 

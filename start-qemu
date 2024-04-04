@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import subprocess
+import json
+
+QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
+
+def build_argparser():
+  parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument("hd_image", help="file to be used as the hard drive image")
+  parser.add_argument("--cdrom", help="file to use as a cdrom image")
+  parser.add_argument("--bridge", default="br0", help="name of bridge interface")
+  parser.add_argument("--appletalk_zone", help="name of AppleTalk zone")
+  parser.add_argument("--appletalk_number", help="number of AppleTalk network")
+  parser.add_argument("--appletalk_hosts",
+                      help="comma separated list of Apple Internet Router hosts")
+  parser.add_argument("--ip_address", help="IP address to configure in MacTCP, as: x.x.x.x/m")
+  parser.add_argument("--ethernet_mac", default="08:00:07:A2:A2:A2",
+                      help="MAC address to assign to emulated ethernet interface")
+  parser.add_argument("--dns_server", help="IP address of DNS server to configure in MacTCP")
+  parser.add_argument("--ram", default="128", help="Amount of RAM in emulated Mac")
+  parser.add_argument("--vnc_port", default="10", help="VNC port")
+  parser.add_argument("--resolution", default="1152x870x8", help="Graphics resolution")
+  parser.add_argument("--reset_pram", action="store_true", help="reset pram.img")
+  return parser
+
+def image_info(path):
+  cmd = ["qemu-img", "info", "--output=json", path]
+  process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+  pstr = process.stdout.read()
+  process.stdout.close()
+  if isinstance(pstr, bytes):
+    pstr = str(pstr, "utf-8")
+  return json.loads(pstr)
+
+def main():
+  args = build_argparser().parse_args()
+
+  if not os.path.exists(os.path.join("/sys/class/net", args.bridge)):
+    print(f"Interface {args.bridge} does not exist")
+    exit(1)
+
+  cmd = ["iptables", "-C", "FORWARD", "-p", "all", "-i", args.bridge, "-j", "ACCEPT"]
+  status = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+  if status.returncode:
+    cmd[1] = "-A"
+    status = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+  with open(os.path.join(QEMU_CONF_PREFIX, "bridge.conf"), "w") as f:
+    print(f"allow {args.bridge}", file=f)
+
+  # FIXME - create/update AIR config
+
+  hd_path = os.path.dirname(os.path.abspath(args.hd_image))
+  pram_path = os.path.join(hd_path, "pram.img")
+
+  if not os.path.exists(pram_path) or args.reset_pram:
+    pram = bytearray([0] * 256)
+    with open(pram_path, mode="wb") as f:
+      f.write(pram)
+
+  vnc_port = args.vnc_port
+  if vnc_port[0] != ':':
+    vnc_port = f":{vnc_port}"
+
+  rom_path = os.path.join(hd_path, "Q800.ROM")
+  cmd = [
+    "qemu-system-m68k",
+    "-M", "q800",
+    "-m", f"{args.ram}",
+    "-bios", rom_path,
+    "-vnc", vnc_port,
+    "-g", f"{args.resolution}",
+    "-drive", f"file={pram_path},format=raw,if=mtd",
+    "-nic", f"bridge,model=dp83932,mac=f{args.ethernet_mac}",
+  ]
+
+  info = image_info(args.hd_image)
+  cmd.extend([
+    "-device", "scsi-hd,scsi-id=0,drive=hd0",
+    "-drive", f"format={info['format']},media=disk,if=none,id=hd0,file={args.hd_image}",
+  ])
+
+  if args.cdrom:
+    info = image_info(args.cdrom)
+    cmd.extend([
+      "-device", "scsi-cd,scsi-id=3,drive=cd3",
+      "-drive", f"format={info['format']},media=disk,if=none,id=cd3,file={args.hd_image}",
+    ])
+
+  # FIXME - update MacTCP settings
+  # FIXME - create/update Apple Internet Router settings
+
+  subprocess.run(cmd)
+
+  return
+
+if __name__ == '__main__':
+  exit(main() or 0)
