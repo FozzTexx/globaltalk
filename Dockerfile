@@ -27,8 +27,14 @@ RUN : \
 	wget \
 	xz-utils \
 	zlib1g-dev \
+        hfsutils \
         iptables \
+        macutils \
+        python3-pip \
     ; rm -rf /var/lib/apt/lists/* \
+     \
+    ; pip3 install --prefix=/usr --upgrade --no-cache-dir \
+        git+https://github.com/jorio/rsrcdump@master \
     ;
 
 ENV QEMU_VERS=8.2.2

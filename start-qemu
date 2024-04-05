@@ -3,6 +3,10 @@ import argparse
 import os
 import subprocess
 import json
+import re
+
+from macfile import MacFile
+from mactcp import MacTCP
 
 QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
 
@@ -16,6 +20,7 @@ def build_argparser():
   parser.add_argument("--appletalk_hosts",
                       help="comma separated list of Apple Internet Router hosts")
   parser.add_argument("--ip_address", help="IP address to configure in MacTCP, as: x.x.x.x/m")
+  parser.add_argument("--gateway", help="IP address of gateway router")
   parser.add_argument("--ethernet_mac", default="08:00:07:A2:A2:A2",
                       help="MAC address to assign to emulated ethernet interface")
   parser.add_argument("--dns_server", help="IP address of DNS server to configure in MacTCP")
@@ -39,6 +44,10 @@ def main():
 
   if not os.path.exists(os.path.join("/sys/class/net", args.bridge)):
     print(f"Interface {args.bridge} does not exist")
+    exit(1)
+
+  if not re.match("^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+/[0-9]+$", args.ip_address):
+    print("Invalid IP or netmask specified:", args.ip_address)
     exit(1)
 
   cmd = ["iptables", "-C", "FORWARD", "-p", "all", "-i", args.bridge, "-j", "ACCEPT"]
@@ -89,7 +98,13 @@ def main():
       "-drive", f"format={info['format']},media=disk,if=none,id=cd3,file={args.hd_image}",
     ])
 
-  # FIXME - update MacTCP settings
+  if args.ip_address:
+    mtcp_prefs = MacFile(args.hd_image, ":System Folder:Preferences:MacTCP Prep")
+    mtcp = MacTCP(mtcp_prefs.resourcePath)
+    mtcp.setIPAddress(args.ip_address, gateway=args.gateway)
+    mtcp.save()
+    mtcp_prefs.save()
+
   # FIXME - create/update Apple Internet Router settings
 
   subprocess.run(cmd)
