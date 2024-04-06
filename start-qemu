@@ -7,8 +7,10 @@ import re
 
 from macfile import MacFile
 from mactcp import MacTCP
+from airconfig import AIRConfig
 
 QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
+GLOBALTALK_CONFIG = "GlobalTalk-config"
 
 IP_PATTERN = "[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+"
 
@@ -18,7 +20,7 @@ def build_argparser():
   parser.add_argument("--cdrom", help="file to use as a cdrom image")
   parser.add_argument("--bridge", default="br0", help="name of bridge interface")
   parser.add_argument("--appletalk_zone", help="name of AppleTalk zone")
-  parser.add_argument("--appletalk_number", help="number of AppleTalk network")
+  parser.add_argument("--appletalk_number", type=int, help="number of AppleTalk network")
   parser.add_argument("--appletalk_hosts",
                       help="comma separated list of Apple Internet Router hosts")
   parser.add_argument("--ip_address", help="IP address to configure in MacTCP, as: x.x.x.x/m")
@@ -49,7 +51,7 @@ def main():
     print(f"Interface {args.bridge} does not exist")
     exit(1)
 
-  if not re.match(f"^{IP_PATTERN}/[0-9]+$", args.ip_address):
+  if args.ip_address and not re.match(f"^{IP_PATTERN}/[0-9]+$", args.ip_address):
     print("Invalid IP or netmask specified:", args.ip_address)
     exit(1)
 
@@ -61,8 +63,6 @@ def main():
 
   with open(os.path.join(QEMU_CONF_PREFIX, "bridge.conf"), "w") as f:
     print(f"allow {args.bridge}", file=f)
-
-  # FIXME - create/update AIR config
 
   hd_path = os.path.dirname(os.path.abspath(args.hd_image))
   pram_path = os.path.join(hd_path, "pram.img")
@@ -123,6 +123,28 @@ def main():
 
     mtcp.save()
     mtcp_prefs.save()
+
+  if args.appletalk_zone or args.appletalk_number or args.appletalk_hosts:
+    if not args.appletalk_zone:
+      print("Must provide appletalk_zone")
+      exit(1)
+    if not args.appletalk_number:
+      print("Must provide appletalk_number")
+      exit(1)
+    if not args.appletalk_hosts:
+      print("Must provide appletalk_hosts")
+      exit(1)
+
+    gt_conf = MacFile(args.hd_image, f":{GLOBALTALK_CONFIG}",
+                      dataPath=os.path.join(hd_path, f"{GLOBALTALK_CONFIG}.bin"))
+    airconf = AIRConfig(gt_conf.resourcePath)
+    airconf.setRouterName(args.appletalk_zone)
+    airconf.setZoneName(args.appletalk_zone)
+    airconf.setZoneNumber(args.appletalk_number, args.appletalk_number)
+    airconf.setHosts(args.appletalk_hosts.split(","))
+
+    airconf.save()
+    gt_conf.save()
 
   # FIXME - create/update Apple Internet Router settings
 

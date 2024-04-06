@@ -3,6 +3,7 @@
 FROM debian:12.5
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
+ENV HISTCONTROL=ignoreboth:erasedups
 
 RUN : \
     ; apt-get update \
@@ -30,6 +31,7 @@ RUN : \
         hfsutils \
         iptables \
         macutils \
+        python3-crcmod \
         python3-pip \
     ; rm -rf /var/lib/apt/lists/* \
      \

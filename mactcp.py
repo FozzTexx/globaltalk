@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from macresource import MacResource
 import rsrcdump
 import struct
 import socket
@@ -6,8 +7,8 @@ from dataclasses import dataclass
 import os
 import argparse
 
-ID_IPLN = 'ipln'
-ID_DNSL = 'dnsl'
+ID_IPLN = ('ipln', 128)
+ID_DNSL = ('dnsl', 128)
 MACTCP_IP_FORMAT = "> 2I IIII"
 
 @dataclass
@@ -22,20 +23,15 @@ class DNSInfo:
   default: bool
   domain: str
 
-class MacTCP:
+class MacTCP(MacResource):
   def __init__(self, path):
-    self.path = path
-    self.rsrcPath = path
-    self.rsrc = rsrcdump.load(self.rsrcPath)
+    super().__init__(path)
     self.ipInfo = self.decodeIPInfo()
     self.dns = self.decodeDNS()
     return
 
-  def dataForID(self, dataID):
-    return self.rsrc[dataID][128].data
-
   def decodeIPInfo(self):
-    data = self.dataForID(ID_IPLN)
+    data = self.dataForResource(*ID_IPLN)
     lenIP = struct.calcsize(MACTCP_IP_FORMAT)
     ipData = struct.unpack(MACTCP_IP_FORMAT, data[:lenIP])
     return IPInfo(
@@ -49,7 +45,7 @@ class MacTCP:
     binMask = self.stringIPToBinary(self.ipInfo.mask)
     binGateway = self.stringIPToBinary(self.ipInfo.gateway)
 
-    data = self.dataForID(ID_IPLN)
+    data = self.dataForResource(*ID_IPLN)
     lenIP = struct.calcsize(MACTCP_IP_FORMAT)
     ipData = struct.unpack(MACTCP_IP_FORMAT, data[:lenIP])
     return struct.pack(MACTCP_IP_FORMAT,
@@ -57,7 +53,7 @@ class MacTCP:
                        binIP, binMask, ipData[4], binGateway) + data[lenIP:]
 
   def decodeDNS(self):
-    data = self.dataForID(ID_DNSL)
+    data = self.dataForResource(*ID_DNSL)
     numEntries = struct.unpack(">H", data[:2])[0]
     offset = 2
     entries = []
@@ -113,13 +109,9 @@ class MacTCP:
     return
 
   def save(self):
-    self.rsrc[ID_IPLN][128].data = self.encodeIPInfo()
-    self.rsrc[ID_DNSL][128].data = self.encodeDNS()
-
-    data = self.rsrc.pack()
-    with open(self.path, "wb") as f:
-      f.write(data)
-
+    self.setDataForResource(self.encodeIPInfo(), *ID_IPLN)
+    self.setDataForResource(self.encodeDNS(), *ID_DNSL)
+    super().save()
     return
 
   @staticmethod
