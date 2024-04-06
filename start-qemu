@@ -10,6 +10,8 @@ from mactcp import MacTCP
 
 QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
 
+IP_PATTERN = "[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+"
+
 def build_argparser():
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument("hd_image", help="file to be used as the hard drive image")
@@ -23,7 +25,8 @@ def build_argparser():
   parser.add_argument("--gateway", help="IP address of gateway router")
   parser.add_argument("--ethernet_mac", default="08:00:07:A2:A2:A2",
                       help="MAC address to assign to emulated ethernet interface")
-  parser.add_argument("--dns_server", help="IP address of DNS server to configure in MacTCP")
+  parser.add_argument("--dns_server", action="append",
+                      help="IP address of DNS server to configure in MacTCP")
   parser.add_argument("--ram", default="128", help="Amount of RAM in emulated Mac")
   parser.add_argument("--vnc_port", default="10", help="VNC port")
   parser.add_argument("--resolution", default="1152x870x8", help="Graphics resolution")
@@ -46,7 +49,7 @@ def main():
     print(f"Interface {args.bridge} does not exist")
     exit(1)
 
-  if not re.match("^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+/[0-9]+$", args.ip_address):
+  if not re.match(f"^{IP_PATTERN}/[0-9]+$", args.ip_address):
     print("Invalid IP or netmask specified:", args.ip_address)
     exit(1)
 
@@ -98,10 +101,26 @@ def main():
       "-drive", f"format={info['format']},media=disk,if=none,id=cd3,file={args.hd_image}",
     ])
 
-  if args.ip_address:
+  if args.ip_address or args.dns_server:
     mtcp_prefs = MacFile(args.hd_image, ":System Folder:Preferences:MacTCP Prep")
     mtcp = MacTCP(mtcp_prefs.resourcePath)
-    mtcp.setIPAddress(args.ip_address, gateway=args.gateway)
+
+    if args.ip_address:
+      mtcp.setIPAddress(args.ip_address, gateway=args.gateway)
+
+    if args.dns_server:
+      mtcp.dns = []
+      for dns in args.dns_server:
+        values = dns.split(":")
+        ip_address = values[0]
+        if not re.match(f"^{IP_PATTERN}$", ip_address):
+          print("Invalid IP address:", ip_address)
+          exit(1)
+        domain = "."
+        if len(values) > 1:
+          domain = values[1]
+        mtcp.addDNS(ip_address, domain)
+
     mtcp.save()
     mtcp_prefs.save()
 

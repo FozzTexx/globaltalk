@@ -25,15 +25,6 @@ class DNSInfo:
 class MacTCP:
   def __init__(self, path):
     self.path = path
-
-    # FIXME - copy MacTCP off of disk image
-    # FIXME - use unar to extract .rsrc
-
-    # hmount GlobalTalk_HD.img
-    # hcopy ':System Folder:Control Panels:MacTCP' .
-    # humount
-    # unar -k visible MacTCP.bin
-
     self.rsrcPath = path
     self.rsrc = rsrcdump.load(self.rsrcPath)
     self.ipInfo = self.decodeIPInfo()
@@ -82,6 +73,15 @@ class MacTCP:
       offset += domainLen + 1
     return entries
 
+  def encodeDNS(self):
+    data = struct.pack(">H", len(self.dns))
+    for entry in self.dns:
+      entryData = struct.pack(">IB", self.stringIPToBinary(entry.ipAddress), entry.default)
+      entryData += entry.domain.encode("macroman")
+      entryData += bytes([0x00])
+      data += entryData
+    return data
+
   def setIPAddress(self, ipAddress, mask=None, gateway=None):
     if not isinstance(ipAddress, str):
       raise ValueError("Unknown format for ipAddress")
@@ -100,19 +100,26 @@ class MacTCP:
       self.ipInfo.gateway = gateway
     return
 
-  def addDNS(self, domain, server):
+  def hasDefaultDNS(self):
+    for entry in self.dns:
+      if entry.default:
+        return True
+    return False
+
+  def addDNS(self, server, domain, default=False):
+    if not self.hasDefaultDNS() and domain != ".":
+      default = True
+    self.dns.append(DNSInfo(server, default, domain))
     return
 
   def save(self):
     self.rsrc[ID_IPLN][128].data = self.encodeIPInfo()
-    # FIXME - update dnsl
+    self.rsrc[ID_DNSL][128].data = self.encodeDNS()
 
     data = self.rsrc.pack()
     with open(self.path, "wb") as f:
       f.write(data)
 
-    # FIXME - put .rsrc back into MacTCP
-    # FIXME - copy MacTCP back to disk image
     return
 
   @staticmethod
