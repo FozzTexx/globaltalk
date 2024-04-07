@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 import struct
 from dataclasses import dataclass, astuple
 import crcmod
 import os
+import argparse
 
 FORMAT_MACBIN = ">B 64p 4s4s B B HHHB B IIIIHB 14s IHBBH"
 
@@ -60,3 +62,17 @@ class MacBinary:
     with open(self.path, "r+b") as f:
       f.write(data)
     return
+
+def build_argparser():
+  parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument("file", help="file to print MacBinary header")
+  return parser
+
+def main():
+  args = build_argparser().parse_args()
+  macbin = MacBinary(args.file)
+  print(macbin.header)
+  return
+
+if __name__ == '__main__':
+  exit(main() or 0)

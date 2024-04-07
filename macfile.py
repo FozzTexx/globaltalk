@@ -77,3 +77,12 @@ class MacFile:
   @property
   def resourcePath(self):
     return self.fileWithExtension(".rsrc")
+
+  @property
+  def catalogID(self):
+    self.mount()
+    cmd = ["hls", "-i", self.macPath]
+    p = subprocess.run(cmd, capture_output=True, text=True)
+    self.unmount()
+    cnid = int(p.stdout.strip().split()[0])
+    return cnid

@@ -29,7 +29,8 @@ class AIRConfig(MacResource):
     return data[1:1+nameLen].decode("macroman")
 
   def encodeName(self):
-    return bytes([len(self.name)]) + self.name.encode("macroman")
+    encName = self.name.encode("macroman")
+    return bytes([len(encName)]) + encName
 
   def decodePorts(self):
     data = self.dataForResource(*ACFG_PORT)
@@ -42,7 +43,7 @@ class AIRConfig(MacResource):
     offset = struct.calcsize(PORT_FORMAT)
     portData = struct.unpack(PORT_FORMAT, data[:offset])
     encoded = struct.pack(PORT_FORMAT, portData[0], portData[1],
-                          self.start, self.end)
+                          self.startPort, self.endPort)
     return encoded + data[offset:]
 
   def decodeZones(self):
@@ -91,8 +92,8 @@ class AIRConfig(MacResource):
     return
 
   def setZoneNumber(self, start, end):
-    self.start = start
-    self.end = end
+    self.startPort = start
+    self.endPort = end
     return
 
   def setHosts(self, hosts):
@@ -132,7 +133,7 @@ def main():
     edited = True
 
   print("Name:", airconf.name)
-  print("Ports:", airconf.start, airconf.end)
+  print("Ports:", airconf.startPort, airconf.endPort)
   print("Zones:", airconf.zones)
   print("Hosts:", airconf.hosts)
 

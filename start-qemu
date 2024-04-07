@@ -4,10 +4,12 @@ import os
 import subprocess
 import json
 import re
+import struct
 
 from macfile import MacFile
 from mactcp import MacTCP
 from airconfig import AIRConfig
+from airprefs import AIRPrefs
 
 QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
 GLOBALTALK_CONFIG = "GlobalTalk-config"
@@ -46,6 +48,8 @@ def image_info(path):
 
 def main():
   args = build_argparser().parse_args()
+
+  # FIXME - get args from environment
 
   if not os.path.exists(os.path.join("/sys/class/net", args.bridge)):
     print(f"Interface {args.bridge} does not exist")
@@ -146,7 +150,13 @@ def main():
     airconf.save()
     gt_conf.save()
 
-  # FIXME - create/update Apple Internet Router settings
+    pref_file = MacFile(args.hd_image, ":System Folder:Extensions:Router")
+    airprefs = AIRPrefs(pref_file.resourcePath)
+    airprefs.setFilename(GLOBALTALK_CONFIG)
+    airprefs.setCNID(gt_conf.catalogID)
+    airprefs.setAutostart(True)
+    airprefs.save()
+    pref_file.save()
 
   subprocess.run(cmd)
 
