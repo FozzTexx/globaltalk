@@ -32,7 +32,7 @@ def build_argparser():
   parser.add_argument("--dns_server", action="append",
                       help="IP address of DNS server to configure in MacTCP")
   parser.add_argument("--ram", default="128", help="Amount of RAM in emulated Mac")
-  parser.add_argument("--vnc_port", default="10", help="VNC port")
+  parser.add_argument("--vnc_port", default="::1:10", help="VNC port")
   parser.add_argument("--resolution", default="1152x870x8", help="Graphics resolution")
   parser.add_argument("--reset_pram", action="store_true", help="reset pram.img")
   return parser

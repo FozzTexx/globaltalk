@@ -1,0 +1,13 @@
+*~
+*.img
+*.qcow2
+*.info
+*.json
+*.rsrc
+*.data
+*.json_resources
+*.zip
+*.hex
+*.bin
+*.ROM
+*.rom
