@@ -6,10 +6,12 @@ import json
 import re
 import struct
 
+from macdisk import HFSDisk
 from macfile import MacFile
 from mactcp import MacTCP
 from airconfig import AIRConfig
 from airprefs import AIRPrefs
+from catalog import Catalog
 
 QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
 GLOBALTALK_CONFIG = "GlobalTalk-config"
@@ -45,6 +47,41 @@ def image_info(path):
   if isinstance(pstr, bytes):
     pstr = str(pstr, "utf-8")
   return json.loads(pstr)
+
+def create_thread_record(disk_path, cnid, filename):
+  disk = HFSDisk(disk_path)
+  disk.mount()
+
+  # FIXME - make sure it's unique
+  thread_path = f":{filename}2"
+  cmd = ["hmkdir", thread_path]
+  subprocess.run(cmd)
+  disk.unmount()
+
+  thread_file = MacFile(disk_path, thread_path)
+  catalog = Catalog(disk)
+  node = catalog.findNode((thread_file.catalogID, ""))
+  sectorNum = catalog.sectorForNode(node[0])
+  sector = bytearray(disk.readSector(sectorNum))
+  pointer = (node[2] + 1) * -2
+  offset = struct.unpack(">H", sector[pointer:pointer+2])[0]
+  reclen = sector[offset]
+
+  sector[offset+2:offset+6] = struct.pack(">I", cnid)
+  pointer = offset+reclen+1
+  pointer = (pointer + 1) // 2 * 2
+  sector[pointer] = 0x04
+  sector[pointer+14] -= 1
+  sector[pointer+15+sector[pointer+14]] = 0
+  disk.writeSector(sectorNum, sector)
+  disk.stream.close()
+
+  disk.mount()
+  cmd = ["hrmdir", thread_path]
+  subprocess.run(cmd)
+  disk.unmount()
+
+  return
 
 def main():
   args = build_argparser().parse_args()
@@ -157,6 +194,8 @@ def main():
     airprefs.setAutostart(True)
     airprefs.save()
     pref_file.save()
+
+    create_thread_record(args.hd_image, gt_conf.catalogID, GLOBALTALK_CONFIG)
 
   subprocess.run(cmd)
 

@@ -14,13 +14,17 @@ class MacFile:
   def __init__(self, diskPath, macPath, dataPath=None):
     self.diskPath = diskPath
     self.macPath = macPath
+    self._dataPath = dataPath
+    return
+
+  def load(self):
     self.temp = tempfile.TemporaryDirectory()
 
     cmd1 = ["hcopy", "-m", self.macPath, "-"]
     cmd2 = ["macunpack", "-f"]
 
-    if dataPath:
-      with open(dataPath, "rb") as f:
+    if self._dataPath:
+      with open(self._dataPath, "rb") as f:
         proc2 = subprocess.Popen(cmd2, stdin=f, cwd=self.temp.name)
         proc2.wait()
     else:
@@ -61,6 +65,8 @@ class MacFile:
     return
 
   def fileWithExtension(self, extension):
+    if not hasattr(self, 'temp'):
+      self.load()
     for f in os.listdir(self.temp.name):
       if f.endswith(extension):
         return os.path.join(self.temp.name, f)
@@ -81,7 +87,7 @@ class MacFile:
   @property
   def catalogID(self):
     self.mount()
-    cmd = ["hls", "-i", self.macPath]
+    cmd = ["hls", "-id", self.macPath]
     p = subprocess.run(cmd, capture_output=True, text=True)
     self.unmount()
     cnid = int(p.stdout.strip().split()[0])

@@ -37,7 +37,7 @@ class LeafEntry:
   data: bytes
 
 FORMAT_DIRREC = ">HH IIII 16s 16s 16s"
-  
+
 @dataclass
 class DirectoryRecord:
   flags: int
@@ -80,7 +80,7 @@ class ThreadRecord:
   reserved: bytes
   parentCNID: int
   name: bytes
-  
+
 def loadBTree(data):
   size = struct.calcsize(FORMAT_NODE)
   bt_data = struct.unpack(FORMAT_NODE, data[:size])
@@ -129,7 +129,7 @@ def loadBTree(data):
       else:
         records.append(None)
     btree.records = records
-    
+
   return btree
 
 FORMAT_HEADER = ">H IIII HH II H I BB I"# 64s"

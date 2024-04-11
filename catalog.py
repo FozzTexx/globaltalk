@@ -36,7 +36,7 @@ class Catalog:
     sector = self.mdb.extentStart + nodeNum \
       + self.mdb.catalogExtentsRecord1start * self.nodesPerBlock
     return sector
-  
+
   def loadNode(self, nodeNum):
     return loadBTree(self.disk.readSector(self.sectorForNode(nodeNum)))
 
@@ -100,7 +100,12 @@ def main():
     node = catalog.findNode((args.cnid, ""))
     print("Found", node)
     if node is not None:
-      hexdump(disk.readSector(catalog.sectorForNode(node[0])))
+      data = disk.readSector(catalog.sectorForNode(node[0]))
+      hexdump(data)
+      pointer = (node[2] + 1) * -2
+      offset = struct.unpack(">H", data[pointer:pointer+2])[0]
+      print(pointer, offset)
+      print(data[offset:])
 
   return
 
