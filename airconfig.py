@@ -12,7 +12,7 @@ ACFG_PORT = ('port', 0)
 
 ZONE_FORMAT = ">H"
 HOST_FORMAT = ">IH"
-PORT_FORMAT = ">HHHH"
+PORT_FORMAT = ">HHHHH"
 
 class AIRConfig(MacResource):
   def __init__(self, path):
@@ -42,8 +42,11 @@ class AIRConfig(MacResource):
     data = self.dataForResource(*ACFG_PORT)
     offset = struct.calcsize(PORT_FORMAT)
     portData = struct.unpack(PORT_FORMAT, data[:offset])
+    seedFlag = 0x07e8
+    if not self.startPort:
+      seedFlag = 0
     encoded = struct.pack(PORT_FORMAT, portData[0], portData[1],
-                          self.startPort, self.endPort)
+                          self.startPort, self.endPort, seedFlag)
     return encoded + data[offset:]
 
   def decodeZones(self):

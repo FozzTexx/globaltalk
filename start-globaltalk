@@ -169,7 +169,7 @@ def main():
     if not args.appletalk_zone:
       print("Must provide appletalk_zone")
       exit(1)
-    if not args.appletalk_number:
+    if args.appletalk_number is None:
       print("Must provide appletalk_number")
       exit(1)
     if not args.appletalk_hosts:
