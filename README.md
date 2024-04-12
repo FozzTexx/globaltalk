@@ -26,6 +26,7 @@ Before you begin, ensure you have the following:
 
 - Docker
 - Bootable 68k Macintosh disk image with Apple Internet Router installed
+- Quadra 800 rom
 
 ## Getting Started
 
@@ -55,6 +56,7 @@ There are several command line flags that can be passed to `start-globaltalk`
   files, but that requires extra steps. Using qemu-nbd makes it
   possible for tools expecting raw images to directly work with qcow2
   images.
+- Get virtio-tablet-device working through VNC so that mouse is tracked
 
 ## License
 
@@ -65,7 +67,7 @@ License](https://www.gnu.org/licenses/gpl-3.0.html).
 
 ## Authors
 
-- [FozzTexx](https://mastodon.fozztexx.com/@fozztexx)
+- [FozzTexx](https://mastodon.fozztexx.com/@fozztexx) [blog](https://insentricity.com)
 
 ## Acknowledgments
 
