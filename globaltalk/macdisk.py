@@ -1,4 +1,5 @@
-from partition import loadPartition
+from .partition import loadPartition
+
 import subprocess
 
 SECTOR_SIZE = 512

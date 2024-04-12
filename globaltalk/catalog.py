@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+from .mdb import loadMDB
+from .btree import loadBTree, IndexEntry
+from .macdisk import HFSDisk
+
 import argparse
 import binascii
 import struct
-
-from mdb import loadMDB
-from btree import loadBTree, IndexEntry
-from macdisk import HFSDisk
 
 MDB_START = 2
 

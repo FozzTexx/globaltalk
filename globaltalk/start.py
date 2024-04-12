@@ -6,12 +6,7 @@ import json
 import re
 import struct
 
-from macdisk import HFSDisk
-from macfile import MacFile
-from mactcp import MacTCP
-from airconfig import AIRConfig
-from airprefs import AIRPrefs
-from catalog import Catalog
+import globaltalk
 
 QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
 GLOBALTALK_CONFIG = "GlobalTalk-config"
@@ -138,8 +133,8 @@ def main():
   if args.cdrom:
     info = image_info(args.cdrom)
     cmd.extend([
-      "-device", "scsi-cd,scsi-id=3,drive=cd3",
-      "-drive", f"format={info['format']},media=disk,if=none,id=cd3,file={args.hd_image}",
+      "-device", "scsi-hd,scsi-id=3,drive=cd3",
+      "-drive", f"format={info['format']},media=cdrom,if=none,id=cd3,file={args.cdrom}",
     ])
 
   if args.ip_address or args.dns_server:

@@ -3,8 +3,9 @@ VERSION=1.0
 TABLET_DRIVER=classic/declrom
 VIRTIO_REPO=https://github.com/elliotnunn/classicvirtio
 VIRTIO_RELEASE=releases/download/latest/classicvirtio-drivers-latest.zip
+SCRIPTS=README.md setup.cfg setup.py $(shell git ls-tree --full-tree -r --name-only --full-name HEAD | sed -ne '/^globaltalk\//p')
 
-$(IMAGE): Dockerfile
+$(IMAGE): Dockerfile globaltalk.tar
 	env BUILDKIT_PROGRESS=plain \
 	  docker buildx build $(REBUILDFLAGS) -f $< \
 	    --build-arg http_proxy=$(http_proxy) \
@@ -29,3 +30,6 @@ pram.img:
 $(TABLET_DRIVER):
 	wget $(VIRTIO_REPO)/$(VIRTIO_RELEASE)
 	unzip $<
+
+globaltalk.tar: $(SCRIPTS)
+	tar -cf $@ $(SCRIPTS)

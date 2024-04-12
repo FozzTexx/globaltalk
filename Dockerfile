@@ -65,3 +65,11 @@ RUN <<EOF
 mkdir /usr/local/etc/qemu
 echo allow br0 > /usr/local/etc/qemu/bridge.conf
 EOF
+
+ADD globaltalk.tar /tmp/globaltalk/
+RUN : \
+    ; cd /tmp/globaltalk \
+    ; ./setup.py install \
+    ; cd \
+    ; rm -rf /tmp/globaltalk \
+    ;

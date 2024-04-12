@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from macresource import MacResource
+from .macresource import MacResource
+
 import rsrcdump
 import struct
 import socket

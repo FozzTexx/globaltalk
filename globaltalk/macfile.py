@@ -1,8 +1,8 @@
+from .macbinary import MacBinary
+
 import subprocess
 import tempfile
 import os
-
-from macbinary import MacBinary
 
 class MountFailed(Exception):
   pass
