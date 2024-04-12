@@ -46,7 +46,7 @@ To get started with GlobalTalk in Docker, follow these steps:
 
 There are several command line flags that can be passed to `start-globaltalk`
 
-### Possible Features
+### Enhancement Ideas
 
 - MacTCP doesn't support DHCP, maybe `start-globaltalk` could make a
   dhcp client call and allocate an IP address? Would probably need to
@@ -57,6 +57,10 @@ There are several command line flags that can be passed to `start-globaltalk`
   possible for tools expecting raw images to directly work with qcow2
   images.
 - Get virtio-tablet-device working through VNC so that mouse is tracked
+
+### Known Problems
+
+- When AIR is running the emulated Mac crashes after a few hours
 
 ## License
 
