@@ -9,7 +9,7 @@ fascinating, but seeing all the hoops required to get Apple Internet
 Router setup and running I avoided it until close to the end of
 #MARCHintosh 2024. In an effort to get my Apple IIe to join GlobalTalk
 I decided to see if there was a way to get everything running in a
-Docker container with a way to simply pass in configuration and not
+Docker container and simply pass in configuration and not
 need to actually click around inside the emulated Macintosh to alter
 configuration.
 
