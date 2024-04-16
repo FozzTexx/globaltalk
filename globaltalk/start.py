@@ -22,7 +22,7 @@ import json
 import re
 import struct
 
-import globaltalk
+from globaltalk import *
 
 QEMU_CONF_PREFIX = "/usr/local/etc/qemu"
 GLOBALTALK_CONFIG = "GlobalTalk-config"
@@ -98,6 +98,10 @@ def main():
   args = build_argparser().parse_args()
 
   # FIXME - get args from environment
+
+  if not os.path.exists(args.hd_image):
+    print("No such image:", args.hd_image)
+    exit(1)
 
   if not os.path.exists(os.path.join("/sys/class/net", args.bridge)):
     print(f"Interface {args.bridge} does not exist")
@@ -187,8 +191,10 @@ def main():
       print("Must provide appletalk_hosts")
       exit(1)
 
-    gt_conf = MacFile(args.hd_image, f":{GLOBALTALK_CONFIG}",
-                      dataPath=os.path.join(hd_path, f"{GLOBALTALK_CONFIG}.bin"))
+    gt_bin_path = os.path.join(hd_path, f"{GLOBALTALK_CONFIG}.bin")
+    if not os.path.exists(gt_bin_path):
+      gt_bin_path = os.path.join("/usr/local/share", f"{GLOBALTALK_CONFIG}.bin")
+    gt_conf = MacFile(args.hd_image, f":{GLOBALTALK_CONFIG}", dataPath=gt_bin_path)
     airconf = AIRConfig(gt_conf.resourcePath)
     airconf.setRouterName(args.appletalk_zone)
     airconf.setZoneName(args.appletalk_zone)

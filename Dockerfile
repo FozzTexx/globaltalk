@@ -73,3 +73,5 @@ RUN : \
     ; cd \
     ; rm -rf /tmp/globaltalk \
     ;
+
+COPY GlobalTalk-config.bin /usr/local/share/
