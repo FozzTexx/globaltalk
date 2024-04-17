@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  web:
+    image: globaltalk
+    init: true
+    network_mode: "host"
+    volumes:
+     - ${PWD}:/globaltalk
+    command:
+     - "start-globaltalk"
+     - "/globaltalk/gthd-tt.img"
+     - "--ip_address=1.2.3.4/24"
+     - "--gateway=1.2.3.1"
+     - "--dns_server=8.8.8.8:google.com"
+     - "--appletalk_zone=YourZoneHere"
+     - "--appletalk_number=12345"
+     - "--appletalk_hosts=example.com,example2.com"
+    cap_add:
+     - NET_ADMIN
+    devices:
+     - /dev/net/tun
+    restart: no
