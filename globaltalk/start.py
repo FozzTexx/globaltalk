@@ -141,7 +141,7 @@ def main():
     "-vnc", vnc_port,
     "-g", f"{args.resolution}",
     "-drive", f"file={pram_path},format=raw,if=mtd",
-    "-nic", f"bridge,model=dp83932,mac=f{args.ethernet_mac}",
+    "-nic", f"bridge,model=dp83932,mac={args.ethernet_mac}",
   ]
 
   info = image_info(args.hd_image)
