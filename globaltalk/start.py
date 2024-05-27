@@ -133,15 +133,18 @@ def main():
     vnc_port = f":{vnc_port}"
 
   rom_path = os.path.join(hd_path, "Q800.ROM")
+  declrom_path = os.path.join(hd_path, "declrom")
   cmd = [
     "qemu-system-m68k",
     "-M", "q800",
     "-m", f"{args.ram}",
     "-bios", rom_path,
     "-vnc", vnc_port,
+    "-device", f"nubus-virtio-mmio,romfile={declrom_path}",
+    "-device", "virtio-tablet-device",
     "-g", f"{args.resolution}",
     "-drive", f"file={pram_path},format=raw,if=mtd",
-    "-nic", f"bridge,model=dp83932,mac=f{args.ethernet_mac}",
+    "-nic", f"bridge,model=dp83932,mac={args.ethernet_mac}",
   ]
 
   info = image_info(args.hd_image)

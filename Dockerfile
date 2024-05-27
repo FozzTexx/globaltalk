@@ -39,8 +39,7 @@ RUN : \
         git+https://github.com/jorio/rsrcdump@master \
     ;
 
-ENV QEMU_VERS=8.2.2
-#ENV QEMU_VERS=9.0.0-rc1
+ENV QEMU_VERS=9.0.0
 
 RUN : \
     ; cd /tmp \
